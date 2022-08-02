@@ -52,12 +52,17 @@ type RsaCertProducer struct {
 	parentCert *x509.Certificate
 }
 
-func (r *RsaCertProducer) SettingCertInfo(fn func(parentCert, templateCert *x509.Certificate)) CertProducerInterface[*x509.Certificate] {
+//func (r *RsaCertProducer) ToX509Cert() (*x509.Certificate, error) {
+//	//TODO implement me
+//	panic("implement me")
+//}
+
+func (r *RsaCertProducer) SettingCertInfo(fn func(parentCert, templateCert any)) CertProducerInterface {
 	fn(r.parentCert, r.template)
 	return r
 }
 
-func (r *RsaCertProducer) WithTLSServer(address ...TLSAddressOption) CertProducerInterface[*x509.Certificate] {
+func (r *RsaCertProducer) WithTLSServer(address ...TLSAddressOption) CertProducerInterface {
 	r.template.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
 	r.template.KeyUsage = x509.KeyUsageDigitalSignature |
 		x509.KeyUsageContentCommitment |
@@ -77,7 +82,7 @@ func (r *RsaCertProducer) WithTLSServer(address ...TLSAddressOption) CertProduce
 	return r
 }
 
-func (r *RsaCertProducer) WithTLSClient() CertProducerInterface[*x509.Certificate] {
+func (r *RsaCertProducer) WithTLSClient() CertProducerInterface {
 	r.template.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth}
 	r.template.KeyUsage = x509.KeyUsageDigitalSignature |
 		x509.KeyUsageContentCommitment |
@@ -86,31 +91,31 @@ func (r *RsaCertProducer) WithTLSClient() CertProducerInterface[*x509.Certificat
 	return r
 }
 
-func (r *RsaCertProducer) WithSubject(subjectInfo pkix.Name) CertProducerInterface[*x509.Certificate] {
+func (r *RsaCertProducer) WithSubject(subjectInfo pkix.Name) CertProducerInterface {
 	r.template.Subject = subjectInfo
 	return r
 }
 
-func (r *RsaCertProducer) WithIssuer(issuerInfo pkix.Name) CertProducerInterface[*x509.Certificate] {
+func (r *RsaCertProducer) WithIssuer(issuerInfo pkix.Name) CertProducerInterface {
 	r.template.Issuer = issuerInfo
 	return r
 }
 
-func (r *RsaCertProducer) WithExpire(start *time.Time, end *time.Time) CertProducerInterface[*x509.Certificate] {
+func (r *RsaCertProducer) WithExpire(start *time.Time, end *time.Time) CertProducerInterface {
 	r.template.NotBefore = *start
 	r.template.NotAfter = *end
 	return r
 }
 
-func (r *RsaCertProducer) WithParent(parentCertTemplate *x509.Certificate, parentPrivateKey any) CertProducerInterface[*x509.Certificate] {
-	r.parentCert = parentCertTemplate
+func (r *RsaCertProducer) WithParent(parentCertTemplate any, parentPrivateKey any) CertProducerInterface {
+	r.parentCert, _ = parentCertTemplate.(*x509.Certificate)
 	if parentPrivateKey != nil {
 		r.privateKey = parentPrivateKey
 	}
 	return r
 }
 
-func (r *RsaCertProducer) WithCaTemplate() CertProducerInterface[*x509.Certificate] {
+func (r *RsaCertProducer) WithCaTemplate() CertProducerInterface {
 	r.template.IsCA = true
 	r.template.KeyUsage = x509.KeyUsageCertSign | x509.KeyUsageCRLSign
 	r.template.BasicConstraintsValid = true
@@ -173,8 +178,8 @@ type Sm2CertProducer struct {
 	parentCert *sm2X509.Certificate
 }
 
-func (s *Sm2CertProducer) WithParent(parentCertTemplate *sm2X509.Certificate, parentPrivateKey any) CertProducerInterface[*sm2X509.Certificate] {
-	s.parentCert = parentCertTemplate
+func (s *Sm2CertProducer) WithParent(parentCertTemplate, parentPrivateKey any) CertProducerInterface {
+	s.parentCert, _ = parentCertTemplate.(*sm2X509.Certificate)
 	if key, ok := parentPrivateKey.(*sm2.PrivateKey); !ok {
 		return nil
 	} else {
@@ -183,30 +188,30 @@ func (s *Sm2CertProducer) WithParent(parentCertTemplate *sm2X509.Certificate, pa
 	return s
 }
 
-func (s *Sm2CertProducer) WithCaTemplate() CertProducerInterface[*sm2X509.Certificate] {
+func (s *Sm2CertProducer) WithCaTemplate() CertProducerInterface {
 	s.template.IsCA = true
 	s.template.KeyUsage = sm2X509.KeyUsageCertSign | sm2X509.KeyUsageCRLSign
 	s.template.BasicConstraintsValid = true
 	return s
 }
 
-func (s *Sm2CertProducer) WithExpire(start *time.Time, end *time.Time) CertProducerInterface[*sm2X509.Certificate] {
+func (s *Sm2CertProducer) WithExpire(start *time.Time, end *time.Time) CertProducerInterface {
 	s.template.NotBefore = *start
 	s.template.NotAfter = *end
 	return s
 }
 
-func (s *Sm2CertProducer) WithSubject(subjectInfo pkix.Name) CertProducerInterface[*sm2X509.Certificate] {
+func (s *Sm2CertProducer) WithSubject(subjectInfo pkix.Name) CertProducerInterface {
 	s.template.Subject = subjectInfo
 	return s
 }
 
-func (s *Sm2CertProducer) WithIssuer(issuerInfo pkix.Name) CertProducerInterface[*sm2X509.Certificate] {
+func (s *Sm2CertProducer) WithIssuer(issuerInfo pkix.Name) CertProducerInterface {
 	s.template.Issuer = issuerInfo
 	return s
 }
 
-func (s *Sm2CertProducer) WithTLSServer(address ...TLSAddressOption) CertProducerInterface[*sm2X509.Certificate] {
+func (s *Sm2CertProducer) WithTLSServer(address ...TLSAddressOption) CertProducerInterface {
 	s.template.ExtKeyUsage = []sm2X509.ExtKeyUsage{sm2X509.ExtKeyUsageServerAuth}
 	s.template.KeyUsage = sm2X509.KeyUsageDigitalSignature |
 		sm2X509.KeyUsageContentCommitment |
@@ -226,7 +231,7 @@ func (s *Sm2CertProducer) WithTLSServer(address ...TLSAddressOption) CertProduce
 	return s
 }
 
-func (s *Sm2CertProducer) WithTLSClient() CertProducerInterface[*sm2X509.Certificate] {
+func (s *Sm2CertProducer) WithTLSClient() CertProducerInterface {
 	s.template.ExtKeyUsage = []sm2X509.ExtKeyUsage{sm2X509.ExtKeyUsageClientAuth}
 	s.template.KeyUsage = sm2X509.KeyUsageDigitalSignature |
 		sm2X509.KeyUsageContentCommitment |
@@ -235,7 +240,7 @@ func (s *Sm2CertProducer) WithTLSClient() CertProducerInterface[*sm2X509.Certifi
 	return s
 }
 
-func (s *Sm2CertProducer) SettingCertInfo(fn func(parentCert *sm2X509.Certificate, templateCert *sm2X509.Certificate)) CertProducerInterface[*sm2X509.Certificate] {
+func (s *Sm2CertProducer) SettingCertInfo(fn func(parentCert, templateCert any)) CertProducerInterface {
 	fn(s.parentCert, s.template)
 	return s
 }

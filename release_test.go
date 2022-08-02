@@ -164,8 +164,8 @@ func TestRsaCertRelease(t *testing.T) {
 		CommonName:   "测试",
 		Organization: []string{"测试2"},
 	}
-	rootCertBytes, err := rsaProducer.SettingCertInfo(func(parentCert, templateCert *x509.Certificate) {
-		templateCert.SerialNumber = big.NewInt(certNo)
+	rootCertBytes, err := rsaProducer.SettingCertInfo(func(parentCert, templateCert any) {
+		(templateCert.(*x509.Certificate)).SerialNumber = big.NewInt(certNo)
 	}).WithSubject(subjectInfo).WithIssuer(subjectInfo).WithCaTemplate().ToCertBytes()
 	if !a.NoError(err) {
 		return
@@ -234,8 +234,8 @@ func TestSm2CertRelease(t *testing.T) {
 		CommonName:   "测试",
 		Organization: []string{"测试2"},
 	}
-	rootCertBytes, err := sm2Producer.SettingCertInfo(func(parentCert, templateCert *sm2X509.Certificate) {
-		templateCert.SerialNumber = big.NewInt(certNo)
+	rootCertBytes, err := sm2Producer.SettingCertInfo(func(parentCert, templateCert any) {
+		(templateCert.(*sm2X509.Certificate)).SerialNumber = big.NewInt(certNo)
 	}).WithSubject(subjectInfo).WithIssuer(subjectInfo).WithCaTemplate().
 		ToCertBytes()
 	if !a.NoError(err) {
