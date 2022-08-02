@@ -21,23 +21,23 @@ func TLSAddrWithIp(ip ...net.IP) TLSAddressOption {
 	}
 }
 
-type CertProducerInterface interface {
+type CertProducerInterface[T any] interface {
 	// WithParent 传入上级证书
-	WithParent(parentCertTemplate any, parentPrivateKey any) CertProducerInterface
+	WithParent(parentCertTemplate T, parentPrivateKey any) CertProducerInterface[T]
 	// WithCaTemplate 伴随Ca证书模板信息
-	WithCaTemplate() CertProducerInterface
+	WithCaTemplate() CertProducerInterface[T]
 	// WithExpire 传入有效期
-	WithExpire(start *time.Time, end *time.Time) CertProducerInterface
+	WithExpire(start *time.Time, end *time.Time) CertProducerInterface[T]
 	// WithSubject 传入主题信息
-	WithSubject(subjectInfo pkix.Name) CertProducerInterface
+	WithSubject(subjectInfo pkix.Name) CertProducerInterface[T]
 	// WithIssuer 传入颁发者信息
-	WithIssuer(issuerInfo pkix.Name) CertProducerInterface
+	WithIssuer(issuerInfo pkix.Name) CertProducerInterface[T]
 	// WithTLSServer 伴随TLS模板信息
-	WithTLSServer(address ...TLSAddressOption) CertProducerInterface
+	WithTLSServer(address ...TLSAddressOption) CertProducerInterface[T]
 	// WithTLSClient  伴随TLS客户端模板
-	WithTLSClient() CertProducerInterface
+	WithTLSClient() CertProducerInterface[T]
 	// SettingCertInfo 设置证书信息
-	SettingCertInfo(fn func(parentCert, templateCert any)) CertProducerInterface
+	SettingCertInfo(fn func(parentCert, templateCert T)) CertProducerInterface[T]
 	// ToCertBytes 转换为证书二进制
 	ToCertBytes() ([]byte, error)
 	// ToCertPem 转换到证书PEM
